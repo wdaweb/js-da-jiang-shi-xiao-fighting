@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* body{
+            background-image: url(./背景.jpg);
+        } */
+        #game {
+            width: 900px;
+            height: 580px;
+            background-image: url(./背景.jpg);
+            cursor: url(./spaceship.png) 50 50, auto;
+            /* 跑出去就隱藏 否則殭屍會跑出去 */
+            overflow: hidden;
+            position: relative;
+        }
+
+        #game>img {
+            position: absolute;
+            height: 60px;
+        }
+    </style>
+</head>
+
+<body>   
+    <div id="game"></div>
+    <input type="button" value="開始遊戲" id="btn-start">
+    <p>分數:<span id="text-score">0</span></p>
+    <p>剩餘時間:<span id="text-time">30</span>秒</p>
+
+    <script src="./jquery-3.5.0.min.js"></script>
+    <script>
+        // 分數
+        let score = 0;
+        // 剩餘時間
+        let timeleft = 30;
+        // 遊戲計時器
+        let gametimer = 0;
+        // 僵屍的流水號  要控制每一隻的殭屍
+        let zbid = 0;
+
+        const rand = (num) => {
+            return Math.round(Math.random() * num)
+        }
+
+        const movezb = (zbid) => {
+            $(`#zb${zbid}`).animate({
+                top: rand(80) + "%",
+                left: rand(100) + "%"
+
+            }, 3000, function () {
+                // 再執行function
+                movezb(zbid);
+            })
+        }
+
+        $("#btn-start").click(function () {
+            // 停用開始按鈕 
+            $(this).attr("disabled", true)
+
+            // 重設
+            score = 0;
+            $("#text-score").text(score);
+            timeleft = 30;
+            $("#text-time").text(timeleft);
+
+            // 遊戲倒數
+            gametimer = setInterval(() => {
+                // 倒數
+                timeleft--;
+                $("#text-time").text(timeleft);
+
+                if (timeleft == 0) {
+                    // 停止計時器
+                    clearInterval(gametimer);
+                    // 啟用開始按鈕
+                    $(this).attr("disabled", false);
+                    setTimeout(() => {
+                        alert("時間到");
+
+                    }, 100)
+                    // 清場
+                    $("#game img").remove();
+                }
+                else {
+
+
+                    // 隨機
+                    const num = rand(10);
+                    // 如果抽到數字大於5，產生一個殭屍
+                    if (num > 5) {
+                        $("#game").append(`<img src="./ufo1.gif" id="zb${zbid}">`);
+                        $(`#zb${zbid}`).css({
+                            top: "0%",
+                            left: rand(80) + "%"
+                        })
+                        movezb(zbid);
+                        zbid++;
+                    }
+                }
+            }, 1000)
+            $("#game").on("click", "img", function () {
+                $(this).attr("src", "./ball.gif");
+                $(this).stop();
+                // "pointer-events", "none"  意思是點擊事件可以穿透別的div，可以點到另一個div
+                $(this).css("pointer-events", "none")
+                score++;
+                $("#text-score").text(score);
+            })
+
+
+        })
+
+    </script>
+</body>
+
+</html>
